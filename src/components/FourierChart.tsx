@@ -18,9 +18,22 @@ interface ChartPoint {
 
 interface FourierChartProps {
   data: ChartPoint[];
+  /** Dominio Y fijo o 'auto' para adaptar al rango de los datos */
+  yDomain?: [number, number] | 'auto';
 }
 
-export function FourierChart({ data }: FourierChartProps) {
+export function FourierChart({ data, yDomain = [-1.5, 1.5] }: FourierChartProps) {
+  const domain: [number, number] =
+    yDomain === 'auto'
+      ? (() => {
+          const values = data.flatMap((d) => [d.original, d.fourier]);
+          if (values.length === 0) return [-1.5, 1.5];
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+          const padding = Math.max(0.2, (max - min) * 0.1);
+          return [min - padding, max + padding];
+        })()
+      : yDomain;
   return (
     <div className="h-[400px] w-full">
       <ResponsiveContainer width="100%" height="100%">
@@ -44,7 +57,7 @@ export function FourierChart({ data }: FourierChartProps) {
           <YAxis
             stroke="#71717a"
             tick={{ fill: '#a1a1aa', fontSize: 12 }}
-            domain={[-1.5, 1.5]}
+            domain={domain}
             label={{
               value: 'Amplitud',
               angle: -90,

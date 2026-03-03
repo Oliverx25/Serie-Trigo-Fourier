@@ -3,24 +3,43 @@ import {
   computeFourierCoefficients,
   evaluateFourierSeries,
 } from './lib/fourier';
-import { SIGNAL_OPTIONS, type SignalId } from './lib/signals';
+import { createCustomSignal } from './lib/customExpression';
+import {
+  SIGNAL_OPTIONS,
+  CUSTOM_LABEL,
+  type SignalId,
+} from './lib/signals';
 import { FourierChart } from './components/FourierChart';
 import { CoefficientsTable } from './components/CoefficientsTable';
 
 const T = 1;
 const SAMPLE_POINTS = 500;
 const DEFAULT_HARMONICS = 10;
+const DEFAULT_CUSTOM_EXPRESSION = 'sin(2*pi*t)';
 
 function App() {
   const [signalId, setSignalId] = useState<SignalId>('square');
   const [harmonics, setHarmonics] = useState(DEFAULT_HARMONICS);
+  const [customExpression, setCustomExpression] =
+    useState(DEFAULT_CUSTOM_EXPRESSION);
 
-  const signalFn = useMemo(
-    () => SIGNAL_OPTIONS[signalId].fn,
-    [signalId]
-  );
+  const signalFn = useMemo(() => {
+    if (signalId === 'custom') {
+      return createCustomSignal(customExpression, T);
+    }
+    return SIGNAL_OPTIONS[signalId].fn;
+  }, [signalId, customExpression]);
 
-  const { coeffs, chartData } = useMemo(() => {
+  const { coeffs, chartData, isValid, error } = useMemo(() => {
+    if (!signalFn) {
+      return {
+        coeffs: { a0: 0, an: [], bn: [] },
+        chartData: [] as { t: number; original: number; fourier: number }[],
+        isValid: false,
+        error: 'Expresión inválida. Usa la variable t (ej: sin(2*pi*t))',
+      };
+    }
+
     const coeffs = computeFourierCoefficients(signalFn, T, harmonics);
 
     const data: { t: number; original: number; fourier: number }[] = [];
@@ -36,7 +55,7 @@ function App() {
       });
     }
 
-    return { coeffs, chartData: data };
+    return { coeffs, chartData: data, isValid: true, error: null };
   }, [signalFn, harmonics]);
 
   return (
@@ -80,8 +99,37 @@ function App() {
                       </option>
                     )
                   )}
+                  <option value="custom">{CUSTOM_LABEL}</option>
                 </select>
               </div>
+              {signalId === 'custom' && (
+                <div className="min-w-[240px] flex-1">
+                  <label
+                    htmlFor="customExpr"
+                    className="mb-2 block text-sm font-medium text-zinc-400"
+                  >
+                    Expresión f(t)
+                  </label>
+                  <input
+                    id="customExpr"
+                    type="text"
+                    value={customExpression}
+                    onChange={(e) => setCustomExpression(e.target.value)}
+                    placeholder="sin(2*pi*t)"
+                    className={`w-full rounded-lg border px-4 py-2.5 font-mono text-sm focus:outline-none focus:ring-1 ${
+                      isValid
+                        ? 'border-zinc-700 bg-zinc-800/80 text-zinc-100 focus:border-emerald-500 focus:ring-emerald-500'
+                        : 'border-red-500/60 bg-zinc-800/80 text-zinc-100 focus:border-red-500 focus:ring-red-500'
+                    }`}
+                  />
+                  {!isValid && error && (
+                    <p className="mt-1.5 text-xs text-red-400">{error}</p>
+                  )}
+                  <p className="mt-1 text-xs text-zinc-500">
+                    Variable: t · Ej: sin(2*pi*t), t^2, cos(t)
+                  </p>
+                </div>
+              )}
               <div>
                 <label
                   htmlFor="harmonics"
@@ -109,7 +157,16 @@ function App() {
             <h2 className="mb-4 font-display text-lg font-medium text-zinc-200">
               Gráfica
             </h2>
-            <FourierChart data={chartData} />
+            {chartData.length > 0 ? (
+              <FourierChart
+                data={chartData}
+                yDomain={signalId === 'custom' ? 'auto' : undefined}
+              />
+            ) : (
+              <div className="flex h-[400px] items-center justify-center rounded-lg bg-zinc-800/30 text-zinc-500">
+                Ingresa una expresión válida para ver la gráfica
+              </div>
+            )}
           </section>
 
           {/* Coeficientes */}
@@ -117,7 +174,13 @@ function App() {
             <h2 className="mb-4 font-display text-lg font-medium text-zinc-200">
               Coeficientes de Fourier
             </h2>
-            <CoefficientsTable coeffs={coeffs} />
+            {isValid ? (
+              <CoefficientsTable coeffs={coeffs} />
+            ) : (
+              <p className="text-sm text-zinc-500">
+                Los coeficientes se mostrarán cuando la expresión sea válida.
+              </p>
+            )}
           </section>
         </div>
       </main>

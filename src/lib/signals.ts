@@ -47,10 +47,16 @@ export const createRectangularPulse = (dutyCycle: number): SignalFunction => {
   };
 };
 
-export type SignalId = 'square' | 'sawtooth' | 'triangle' | 'sine' | 'rect';
+export type SignalId =
+  | 'square'
+  | 'sawtooth'
+  | 'triangle'
+  | 'sine'
+  | 'rect'
+  | 'custom';
 
 export const SIGNAL_OPTIONS: Record<
-  SignalId,
+  Exclude<SignalId, 'custom'>,
   { label: string; fn: SignalFunction }
 > = {
   square: { label: 'Onda cuadrada', fn: squareWave },
@@ -62,3 +68,5 @@ export const SIGNAL_OPTIONS: Record<
     fn: createRectangularPulse(0.25),
   },
 };
+
+export const CUSTOM_LABEL = 'Expresión personalizada';

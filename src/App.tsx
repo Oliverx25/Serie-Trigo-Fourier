@@ -13,6 +13,10 @@ import { FourierChart } from './components/FourierChart';
 import { CoefficientsTable } from './components/CoefficientsTable';
 
 const T = 1;
+const T_MIN = -T * 1.5;
+const T_MAX = T * 1.5;
+/** Para expresión personalizada: período = ancho del rango mostrado, así la serie aproxima toda la curva visible */
+const T_CUSTOM = T_MAX - T_MIN;
 const SAMPLE_POINTS = 500;
 const DEFAULT_HARMONICS = 10;
 const DEFAULT_CUSTOM_EXPRESSION = 'sin(2*pi*t)';
@@ -40,23 +44,22 @@ function App() {
       };
     }
 
-    const coeffs = computeFourierCoefficients(signalFn, T, harmonics);
+    const period = signalId === 'custom' ? T_CUSTOM : T;
+    const coeffs = computeFourierCoefficients(signalFn, period, harmonics);
 
     const data: { t: number; original: number; fourier: number }[] = [];
-    const tMin = -T * 1.5;
-    const tMax = T * 1.5;
-    const step = (tMax - tMin) / SAMPLE_POINTS;
+    const step = (T_MAX - T_MIN) / SAMPLE_POINTS;
 
-    for (let t = tMin; t <= tMax; t += step) {
+    for (let t = T_MIN; t <= T_MAX; t += step) {
       data.push({
         t,
         original: signalFn(t),
-        fourier: evaluateFourierSeries(coeffs, t, T),
+        fourier: evaluateFourierSeries(coeffs, t, period),
       });
     }
 
     return { coeffs, chartData: data, isValid: true, error: null };
-  }, [signalFn, harmonics]);
+  }, [signalFn, harmonics, signalId]);
 
   return (
     <div className="min-h-screen bg-[#0f0f12] text-zinc-100">
@@ -186,7 +189,8 @@ function App() {
       </main>
 
       <footer className="mt-12 border-t border-zinc-800/60 py-6 text-center text-sm text-zinc-500">
-        Serie Trigonométrica de Fourier en Tiempo Continuo · T = {T}
+        Serie Trigonométrica de Fourier en Tiempo Continuo
+        {signalId === 'custom' ? ` · Período de análisis T = ${T_CUSTOM}` : ` · T = ${T}`}
       </footer>
     </div>
   );

@@ -151,6 +151,9 @@ function App() {
                   }
                   className="w-24 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2.5 font-display text-sm text-zinc-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                 />
+                <p className="mt-1 text-xs text-zinc-500">
+                  Oscilaciones visibles por periodo (se calculan 2N términos)
+                </p>
               </div>
             </div>
           </section>

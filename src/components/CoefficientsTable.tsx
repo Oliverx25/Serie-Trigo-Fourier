@@ -49,7 +49,7 @@ export function CoefficientsTable({ coeffs }: CoefficientsTableProps) {
         </tbody>
       </table>
       <p className="mt-4 text-xs text-zinc-500">
-        f(t) = a₀/2 + Σ[aₙ·cos(2nπt/T) + bₙ·sin(2nπt/T)]
+        f(t) = a₀/2 + Σ[aₙ·cos(πnt/T) + bₙ·sin(πnt/T)] — N armónicos → 2N términos (n=1..2N)
       </p>
     </div>
   );

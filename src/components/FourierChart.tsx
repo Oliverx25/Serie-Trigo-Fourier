@@ -93,11 +93,12 @@ export function FourierChart({
               <span className="text-sm text-zinc-300">{value}</span>
             )}
           />
-          {/* Eje t = 0 resaltado: secciona la gráfica entre t negativo y t positivo (como eje de ordenadas) */}
+          {/* Eje t = 0: mismo estilo punteado que y=0, divide la gráfica verticalmente */}
           <ReferenceLine
             x={0}
-            stroke="#a1a1aa"
-            strokeWidth={2}
+            stroke="#52525b"
+            strokeWidth={1.5}
+            strokeDasharray="2 2"
             label={{
               value: 't = 0',
               position: 'insideTop',
@@ -105,18 +106,7 @@ export function FourierChart({
               fontSize: 12,
             }}
           />
-          {/* Eje F(t) = 0 resaltado: secciona la gráfica entre amplitud negativa y positiva */}
-          <ReferenceLine
-            y={0}
-            stroke="#a1a1aa"
-            strokeWidth={2}
-            label={{
-              value: 'F(t) = 0',
-              position: 'insideRight',
-              fill: '#e4e4e7',
-              fontSize: 12,
-            }}
-          />
+          <ReferenceLine y={0} stroke="#52525b" strokeDasharray="2 2" />
           <Line
             type="monotone"
             dataKey="original"

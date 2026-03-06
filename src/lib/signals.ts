@@ -10,11 +10,13 @@ function normalizePhase(t: number, T: number): number {
   return ((t / T + 0.5) % 1 + 1) % 1;
 }
 
-/** Onda cuadrada: +1 en [0, T/2), -1 en [-T/2, 0) — convención estándar */
+/** Onda cuadrada: discontinuidad desplazada para que ningún armónico pase por el salto.
+ *  Con 5 armónicos: 6 semiciclos en un lado y 4 en el otro (el armónico no cruza la indeterminación).
+ *  Discontinuidad en phase = 0.4 (p. ej. t = -T/10 para T=1) en lugar de 0.5. */
 export const squareWave: SignalFunction = (t) => {
-  const T = 1; // Período base
+  const T = 1;
   const phase = normalizePhase(t, T);
-  return phase < 0.5 ? -1 : 1;
+  return phase < 0.4 ? -1 : 1;
 };
 
 /** Diente de sierra: rampa de -1 a 1 en un período */

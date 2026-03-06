@@ -93,16 +93,16 @@ export function FourierChart({
               <span className="text-sm text-zinc-300">{value}</span>
             )}
           />
-          {/* Eje de ordenadas (t = 0) bien visible, tipo gráfica cartesiana */}
+          {/* Eje t = 0 resaltado: secciona la gráfica entre t negativo y t positivo (como eje de ordenadas) */}
           <ReferenceLine
             x={0}
-            stroke="#71717a"
-            strokeWidth={1.5}
+            stroke="#a1a1aa"
+            strokeWidth={2}
             label={{
               value: 't = 0',
-              position: 'top',
-              fill: '#a1a1aa',
-              fontSize: 11,
+              position: 'insideTop',
+              fill: '#e4e4e7',
+              fontSize: 12,
             }}
           />
           <ReferenceLine y={0} stroke="#52525b" strokeDasharray="2 2" />

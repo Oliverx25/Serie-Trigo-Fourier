@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
+import { formatAxisTick } from '../lib/formatAxisTick';
 
 interface ChartPoint {
   t: number;
@@ -20,9 +21,15 @@ interface FourierChartProps {
   data: ChartPoint[];
   /** Dominio Y fijo o 'auto' para adaptar al rango de los datos */
   yDomain?: [number, number] | 'auto';
+  /** Dominio X fijo para centrar t=0 (ej. [tMin, tMax]) */
+  xDomain?: [number, number];
 }
 
-export function FourierChart({ data, yDomain = [-1.5, 1.5] }: FourierChartProps) {
+export function FourierChart({
+  data,
+  yDomain = [-1.5, 1.5],
+  xDomain,
+}: FourierChartProps) {
   const domain: [number, number] =
     yDomain === 'auto'
       ? (() => {
@@ -39,14 +46,15 @@ export function FourierChart({ data, yDomain = [-1.5, 1.5] }: FourierChartProps)
       <ResponsiveContainer width="100%" height="100%">
         <LineChart
           data={data}
-          margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+          margin={{ top: 10, right: 30, left: 24, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" opacity={0.5} />
           <XAxis
             dataKey="t"
             stroke="#71717a"
             tick={{ fill: '#a1a1aa', fontSize: 12 }}
-            tickFormatter={(v) => v.toFixed(2)}
+            tickFormatter={(v) => formatAxisTick(Number(v))}
+            domain={xDomain}
             label={{
               value: 't',
               position: 'insideBottom',
@@ -57,6 +65,7 @@ export function FourierChart({ data, yDomain = [-1.5, 1.5] }: FourierChartProps)
           <YAxis
             stroke="#71717a"
             tick={{ fill: '#a1a1aa', fontSize: 12 }}
+            tickFormatter={(v) => formatAxisTick(Number(v))}
             domain={domain}
             label={{
               value: 'Amplitud',
@@ -73,7 +82,7 @@ export function FourierChart({ data, yDomain = [-1.5, 1.5] }: FourierChartProps)
             }}
             labelStyle={{ color: '#a1a1aa' }}
             formatter={(value: number, name: string) => [
-              value.toFixed(4),
+              formatAxisTick(value),
               name,
             ]}
             labelFormatter={(t) => `t = ${Number(t).toFixed(3)}`}
@@ -84,7 +93,18 @@ export function FourierChart({ data, yDomain = [-1.5, 1.5] }: FourierChartProps)
               <span className="text-sm text-zinc-300">{value}</span>
             )}
           />
-          <ReferenceLine x={0} stroke="#52525b" strokeDasharray="2 2" />
+          {/* Eje de ordenadas (t = 0) bien visible, tipo gráfica cartesiana */}
+          <ReferenceLine
+            x={0}
+            stroke="#71717a"
+            strokeWidth={1.5}
+            label={{
+              value: 't = 0',
+              position: 'top',
+              fill: '#a1a1aa',
+              fontSize: 11,
+            }}
+          />
           <ReferenceLine y={0} stroke="#52525b" strokeDasharray="2 2" />
           <Line
             type="monotone"

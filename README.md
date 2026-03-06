@@ -94,9 +94,8 @@ Si se usan **N armónicos** (\(n = 1, 2, \ldots, N\)), la suma incluye el armón
 
 ### Discontinuidad y posición de los armónicos (onda cuadrada)
 
-En una **onda cuadrada** el punto donde la señal salta de \(-1\) a \(+1\) es una **discontinuidad**: la función no está definida en ese instante. Cada armónico es una sinusoide (2 semiciclos por armónico en un periodo) y **no debe cruzar ese punto con un cruce por cero**: si la discontinuidad coincide con \(t = 0\) en la serie, todos los \(\sin(2\pi n t/T)\) se anulan ahí y la serie “atraviesa” el salto, repartiendo los semiciclos de forma simétrica (5 y 5 a cada lado para 5 armónicos).
-
-Para evitar que un armónico pase por la indeterminación, en este proyecto la **onda cuadrada** está definida con la discontinuidad **desplazada** respecto al centro del periodo (en concreto, en fase \(0{,}4\) en lugar de \(0{,}5\), es decir, en \(t = -T/10\) para \(T=1\)). Así, ningún armónico tiene un cruce por cero exactamente en el salto y la distribución de semiciclos deja de ser simétrica: con **5 armónicos** se obtienen **6 semiciclos** en un lado del salto y **4 en el otro** (3 armónicos completos a un lado y 2 al otro), en lugar de 5 y 5 a cada lado.
+En una **onda cuadrada** el punto donde la señal salta de \(-1\) a \(+1\) es una **discontinuidad**: la función no está definida en ese instante. Si ese salto coincide con \(t = 0\) en la serie, todos los términos en \(\sin(2\pi n t/T)\) se anulan ahí y la aproximación reparte los semiciclos de forma **simétrica** (p. ej. 5 y 5 a cada lado para 5 armónicos).  
+Algunas convenciones sugieren desplazar la discontinuidad para que ningún armónico tenga un cruce por cero en el salto, lo que daría una distribución **asimétrica** de semiciclos (p. ej. 6 en un lado y 4 en el otro). Ese desplazamiento implica cambiar el **duty cycle** de la señal: dejaría de ser 50 %–50 % y pasaría a ser una **onda rectangular** (p. ej. 40 %–60 %). En este proyecto se mantiene la **onda cuadrada estándar** (50 %–50 %, discontinuidad en \(t = 0\) dentro de cada periodo), de modo que la señal sigue siendo cuadrada y la aproximación muestra N semiciclos a cada lado del salto para N armónicos.
 
 ---
 

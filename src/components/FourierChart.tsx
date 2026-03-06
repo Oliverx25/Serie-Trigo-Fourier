@@ -105,7 +105,18 @@ export function FourierChart({
               fontSize: 12,
             }}
           />
-          <ReferenceLine y={0} stroke="#52525b" strokeDasharray="2 2" />
+          {/* Eje F(t) = 0 resaltado: secciona la gráfica entre amplitud negativa y positiva */}
+          <ReferenceLine
+            y={0}
+            stroke="#a1a1aa"
+            strokeWidth={2}
+            label={{
+              value: 'F(t) = 0',
+              position: 'insideRight',
+              fill: '#e4e4e7',
+              fontSize: 12,
+            }}
+          />
           <Line
             type="monotone"
             dataKey="original"

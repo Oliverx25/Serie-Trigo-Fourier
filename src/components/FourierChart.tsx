@@ -93,20 +93,6 @@ export function FourierChart({
               <span className="text-sm text-zinc-300">{value}</span>
             )}
           />
-          {/* Eje t = 0: mismo estilo punteado que y=0, divide la gráfica verticalmente */}
-          <ReferenceLine
-            x={0}
-            stroke="#52525b"
-            strokeWidth={1.5}
-            strokeDasharray="2 2"
-            label={{
-              value: 't = 0',
-              position: 'insideTop',
-              fill: '#e4e4e7',
-              fontSize: 12,
-            }}
-          />
-          <ReferenceLine y={0} stroke="#52525b" strokeDasharray="2 2" />
           <Line
             type="monotone"
             dataKey="original"
@@ -125,6 +111,21 @@ export function FourierChart({
             strokeDasharray="4 4"
             dot={false}
             connectNulls
+          />
+          {/* Eje horizontal F(t)=0 (eje de las x) — punteado */}
+          <ReferenceLine y={0} stroke="#52525b" strokeWidth={1.5} strokeDasharray="2 2" />
+          {/* Eje vertical t=0 (eje de las ordenadas) — punteado, dibujado encima para que se vea */}
+          <ReferenceLine
+            x={0}
+            stroke="#a1a1aa"
+            strokeWidth={2}
+            strokeDasharray="4 4"
+            label={{
+              value: 't = 0',
+              position: 'insideTop',
+              fill: '#e4e4e7',
+              fontSize: 12,
+            }}
           />
         </LineChart>
       </ResponsiveContainer>

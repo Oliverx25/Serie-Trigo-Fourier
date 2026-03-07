@@ -14,7 +14,7 @@ function normalizePhase(t: number, T: number): number {
 export const squareWave: SignalFunction = (t) => {
   const T = 1;
   const phase = normalizePhase(t, T);
-  return phase < 0.45 ? -1 : 1;
+  return phase < 0.5 ? -1 : 1;
 };
 
 /** Diente de sierra: rampa de -1 a 1 en un período */

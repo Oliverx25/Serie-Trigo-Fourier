@@ -1,48 +1,27 @@
-# Serie Trigonométrica de Fourier en Tiempo Continuo
+# Serie trigonométrica de Fourier
 
-Aplicación web interactiva que calcula y visualiza la **Serie Trigonométrica de Fourier** para señales periódicas en tiempo continuo: descompone una señal en sus armónicos (senos y cosenos) y muestra la aproximación junto con la señal original y los coeficientes calculados.
-
----
-
-## Índice
-
-- [Cómo funciona la Serie Trigonométrica de Fourier](#cómo-funciona-la-serie-trigonométrica-de-fourier)
-- [Por qué N armónicos implican N picos y N valles por periodo](#por-qué-n-armónicos-implican-n-picos-y-n-valles-por-periodo)
-  - [Discontinuidad y posición de los armónicos (onda cuadrada)](#discontinuidad-y-posición-de-los-armónicos-onda-cuadrada)
-- [Características del proyecto](#características-del-proyecto)
-- [Uso](#uso)
-- [Implementación](#implementación)
-- [Desarrollo y despliegue](#desarrollo-y-despliegue)
-- [Tecnologías](#tecnologías)
+Aplicación web interactiva para calcular y visualizar la **serie trigonométrica de Fourier** de señales periódicas en tiempo continuo: descompone una señal en sus armónicos (senos y cosenos) y muestra la aproximación junto con la señal original y los coeficientes. Pensada como apoyo en la asignatura de **Procesamiento Digital de Señales (PDS)**.
 
 ---
 
-## Cómo funciona la Serie Trigonométrica de Fourier
+## Definición matemática
 
-### Idea central
+Cualquier señal **periódica** de periodo \(T\) puede expresarse como una suma infinita de senos y cosenos cuyas frecuencias son **múltiplos enteros** de la frecuencia fundamental \(\omega_0 = 2\pi/T\). Esa suma se llama **serie trigonométrica de Fourier**:
 
-Cualquier señal **periódica** de periodo \(T\) puede expresarse como una suma infinita de senos y cosenos cuyas frecuencias son **múltiplos enteros** de la frecuencia fundamental \(\omega_0 = 2\pi/T\). Esa suma se llama **Serie Trigonométrica de Fourier**:
-
-$$
-f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n \cos\left(\frac{2\pi n}{T}t\right) + b_n \sin\left(\frac{2\pi n}{T}t\right) \right]
-$$
+$$f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n \cos\left(\frac{2\pi n}{T}t\right) + b_n \sin\left(\frac{2\pi n}{T}t\right) \right]$$
 
 - **\(a_0/2\)**: componente de continua (valor medio de la señal).
 - **\(a_n\), \(b_n\)**: coeficientes del armónico \(n\). Cada par \((a_n, b_n)\) define la amplitud y fase de la componente a frecuencia \(n/T\) (es decir, \(n\) ciclos en un periodo \(T\)).
 
 ### Cálculo de los coeficientes
 
-Los coeficientes se obtienen integrando la señal multiplicada por el seno o coseno correspondiente sobre **un periodo** (en este proyecto se usa el intervalo \([-T/2, T/2]\)):
+Los coeficientes se obtienen integrando la señal multiplicada por el seno o coseno correspondiente sobre **un periodo**. En este proyecto se usa el intervalo \([-T/2, T/2]\):
 
-$$
-a_0 = \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,dt
-$$
+$$a_0 = \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,dt$$
 
-$$
-a_n = \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,\cos\left(\frac{2\pi n}{T}t\right)dt
+$$a_n = \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,\cos\left(\frac{2\pi n}{T}t\right)dt
 \qquad
-b_n = \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,\sin\left(\frac{2\pi n}{T}t\right)dt
-$$
+b_n = \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,\sin\left(\frac{2\pi n}{T}t\right)dt$$
 
 Estas fórmulas se deducen de la **ortogonalidad** de las funciones \(\cos(2\pi n t/T)\) y \(\sin(2\pi n t/T)\) en \([-T/2, T/2]\): al multiplicar \(f(t)\) por una de ellas e integrar, solo “sobrevive” la contribución de ese armónico.
 
@@ -50,115 +29,98 @@ Estas fórmulas se deducen de la **ortogonalidad** de las funciones \(\cos(2\pi 
 
 En la práctica se usa una **suma finita** (truncada) con \(N\) armónicos:
 
-$$
-f(t) \approx \frac{a_0}{2} + \sum_{n=1}^{N} \left[ a_n \cos\left(\frac{2\pi n}{T}t\right) + b_n \sin\left(\frac{2\pi n}{T}t\right) \right]
-\]
+$$f(t) \approx \frac{a_0}{2} + \sum_{n=1}^{N} \left[ a_n \cos\left(\frac{2\pi n}{T}t\right) + b_n \sin\left(\frac{2\pi n}{T}t\right) \right]$$
 
-Cuanto mayor sea \(N\), mejor se aproxima la forma de la señal (salvo el fenómeno de Gibbs cerca de discontinuidades). En esta aplicación, \(N\) es el **número de armónicos** que se elige en la interfaz (entre 1 y 50).
+Cuanto mayor sea \(N\), mejor se aproxima la forma de la señal (salvo el fenómeno de Gibbs cerca de discontinuidades). En esta aplicación, \(N\) es el **número de armónicos** elegido en la interfaz (entre 1 y 50).
 
----
+### Relación armónico n y forma de la aproximación
 
-## Por qué N armónicos implican N picos y N valles por periodo
-
-Es frecuente observar que, al elegir por ejemplo **5 armónicos**, en **un solo periodo** de la señal se ven **5 picos y 5 valles** en la aproximación de Fourier (es decir, 10 “semi-oscilaciones” en total). Esto no es un error del programa, sino una consecuencia directa de la definición de la serie.
-
-### Relación entre armónico \(n\) y frecuencia
-
-El armónico \(n\) tiene **frecuencia angular** \(\omega_n = 2\pi n / T\). Por tanto:
-
-- **Frecuencia** (en ciclos por unidad de tiempo): \(f_n = n/T\).
-- **Periodo** de ese armónico: \(T_n = T/n\).
-
-Es decir: en un intervalo de tiempo de longitud \(T\) (un periodo de la señal), el armónico \(n\) completa **exactamente \(n\) ciclos**.
-
-### Un ciclo = un pico + un valle
-
-Cada término de la forma \(a_n \cos(\omega_n t) + b_n \sin(\omega_n t)\) es una **sinusoide** de frecuencia \(\omega_n\). En un ciclo completo, una sinusoide tiene:
-
-- **Un máximo** (pico),
-- **Un mínimo** (valle).
-
-Por tanto, en un periodo \(T\) de la señal:
-
-- El **armónico 1** hace 1 ciclo → contribuye con **1 pico y 1 valle**.
-- El **armónico 2** hace 2 ciclos → **2 picos y 2 valles**.
-- …
-- El **armónico \(n\)** hace \(n\) ciclos → **\(n\) picos y \(n\) valles**.
-
-### Conclusión para N armónicos
-
-Si se usan **N armónicos** (\(n = 1, 2, \ldots, N\)), la suma incluye el armónico de **mayor frecuencia** con \(n = N\), que en un periodo \(T\) da **N ciclos**, es decir **N picos y N valles**. La forma total de la aproximación resulta de superponer todos los armónicos; en muchos casos (por ejemplo en la onda cuadrada) esa estructura de **N picos y N valles por periodo** se aprecia claramente en la gráfica.
-
-**Resumen**:  
-**“Número de armónicos = N”** implica que el armónico más alto oscila **N veces** en un periodo, por lo que es correcto ver **N picos y N valles** (en total, 2N extremos) en un solo periodo de la aproximación. No hay duplicación: son exactamente N armónicos generando esa cantidad de oscilaciones.
-
-### Discontinuidad y posición de los armónicos (onda cuadrada)
-
-En una **onda cuadrada** el punto donde la señal salta de \(-1\) a \(+1\) es una **discontinuidad**: la función no está definida en ese instante. Si ese salto coincide con \(t = 0\) en la serie, todos los términos en \(\sin(2\pi n t/T)\) se anulan ahí y la aproximación reparte los semiciclos de forma **simétrica** (p. ej. 5 y 5 a cada lado para 5 armónicos).  
-Algunas convenciones sugieren desplazar la discontinuidad para que ningún armónico tenga un cruce por cero en el salto, lo que daría una distribución **asimétrica** de semiciclos (p. ej. 6 en un lado y 4 en el otro). Ese desplazamiento implica cambiar el **duty cycle** de la señal: dejaría de ser 50 %–50 % y pasaría a ser una **onda rectangular** (p. ej. 40 %–60 %). En este proyecto se mantiene la **onda cuadrada estándar** (50 %–50 %, discontinuidad en \(t = 0\) dentro de cada periodo), de modo que la señal sigue siendo cuadrada y la aproximación muestra N semiciclos a cada lado del salto para N armónicos.
-
----
-
-## Características del proyecto
-
-- **Cálculo de coeficientes** \(a_0\), \(a_n\) y \(b_n\) por integración numérica (regla de Simpson 1/3) en \([-T/2, T/2]\).
-- **Gráfica interactiva**: comparación entre la señal original y la aproximación de Fourier (hasta N armónicos).
-- **Señales predefinidas**: onda cuadrada, diente de sierra, triangular, sinusoidal, pulso rectangular.
-- **Expresión personalizada**: introduce \(f(t)\) con la variable `t` (sintaxis [mathjs](https://mathjs.org/)); el periodo de análisis para “custom” es el ancho del rango mostrado.
-- **Armónicos ajustables**: número de términos \(N\) entre 1 y 50.
-- **Tabla de coeficientes**: se muestran \(a_0\) y los pares \((a_n, b_n)\) para cada \(n\) usado.
-
----
-
-## Uso
-
-1. Elige una **señal** en el desplegable (predefinida o “Expresión personalizada”).
-2. Si usas expresión personalizada, escribe \(f(t)\) en el campo de texto (ej: `sin(2*pi*t)`, `cos(t)`, `t^2`). La variable debe ser `t`.
-3. Ajusta el **número de armónicos** (1–50). Verás cómo la aproximación gana detalle y, en un periodo, aparecen N picos y N valles cuando el armónico máximo domina.
-4. La **gráfica** muestra en verde la señal original y en rosa la aproximación de Fourier. La **tabla** lista los coeficientes calculados.
-
-Para señales predefinidas el periodo es \(T = 1\); el rango mostrado es \(t \in [-1.5, 1.5]\) (1,5 periodos a cada lado). Para expresión personalizada, el periodo de integración y visualización es el ancho de ese rango.
+El armónico \(n\) tiene frecuencia \(f_n = n/T\) y en un periodo \(T\) completa **exactamente \(n\) ciclos**. Cada sinusoide tiene un pico y un valle por ciclo; por tanto, con \(N\) armónicos el término de mayor frecuencia (\(n=N\)) aporta **N picos y N valles** en un periodo. Es correcto observar esa estructura en la gráfica (p. ej. 5 armónicos → 5 picos y 5 valles por periodo).
 
 ---
 
 ## Implementación
 
-- **Integración**: regla de Simpson con 1000 subintervalos por defecto en `simpsonIntegral` (`src/lib/fourier.ts`).
-- **Coeficientes**: `computeA0`, `computeAn`, `computeBn` implementan las integrales anteriores; `computeFourierCoefficients` calcula \(n = 1 \ldots N\).
-- **Evaluación**: `evaluateFourierSeries` evalúa la suma truncada con \(\omega_n = 2\pi n/T\) en cada punto \(t\).
-- **Señales**: definidas en `src/lib/signals.ts` (periodo normalizado); expresiones custom en `src/lib/customExpression.ts` vía mathjs.
-- **Visualización**: `FourierChart` (Recharts) para la gráfica; `CoefficientsTable` para la tabla de coeficientes.
+### Integración numérica
+
+Las integrales que definen \(a_0\), \(a_n\) y \(b_n\) se aproximan con la **regla de Simpson 1/3** sobre una malla equiespaciada en \([-T/2, T/2]\) (por defecto 1000 subintervalos en `simpsonIntegral`, en `src/lib/fourier.ts`). Para cada coeficiente se construye el integrando correspondiente (\(f(t)\), \(f(t)\cos(2\pi n t/T)\) o \(f(t)\sin(2\pi n t/T)\)) y se evalúa la suma de Simpson.
+
+### Señales
+
+Cada señal se representa como una función \(t \mapsto \text{valor}\) (tipo `SignalFunction`):
+
+- **Predefinidas** (`src/lib/signals.ts`): onda cuadrada, diente de sierra, triangular, sinusoidal, pulso rectangular (periodo \(T=1\), extensión periódica mediante fase normalizada).
+- **Expresión personalizada** (`src/lib/customExpression.ts`): cadena evaluada con [mathjs](https://mathjs.org/) usando la variable `t` (ej: `sin(2*pi*t)`, `cos(t)`, `t^2`). Para señales custom, el periodo de análisis es el ancho del rango mostrado (\(T = T_{\max} - T_{\min}}\), p. ej. 3) de modo que la serie aproxime la curva visible en ese intervalo.
+
+### Evaluación de la serie
+
+La función `evaluateFourierSeries` recibe los coeficientes \((a_0, a_n, b_n)\), el instante \(t\) y el periodo \(T\), y devuelve el valor de la suma truncada con \(\omega_n = 2\pi n/T\). Los puntos de la gráfica se generan muestreando la señal original y la aproximación en una malla de 500 puntos sobre el rango mostrado.
 
 ---
 
-## Desarrollo y despliegue
+## Interfaz y uso
+
+### Sección "Parámetros"
+
+- **Señal**: selector entre presets (onda cuadrada, diente de sierra, triangular, sinusoidal, pulso rectangular) o "Expresión personalizada". Si es personalizada, se muestra un campo de texto para \(f(t)\) (variable `t`).
+- **Número de armónicos**: entero entre 1 y 50. Controla cuántos términos \(n=1,\ldots,N\) se incluyen en la suma de Fourier.
+
+### Sección "Gráfica"
+
+- **Señal original**: curva en verde (continua).
+- **Aproximación de Fourier**: curva en rosa (discontinua). Se observa cómo al aumentar \(N\) la aproximación se acerca a la señal (y en un periodo aparecen N picos y N valles cuando domina el armónico máximo).
+- Para señales predefinidas el rango mostrado es \(t \in [-1.5, 1.5]\) (1,5 periodos a cada lado) con \(T=1\). Para expresión personalizada el dominio y el periodo de integración dependen del ancho del rango.
+
+### Sección "Coeficientes de Fourier"
+
+- Valor de **\(a_0\)** (componente DC).
+- Tabla con **\(a_n\)** y **\(b_n\)** para cada \(n=1,\ldots,N\).
+- Recordatorio de la fórmula de la serie.
+
+---
+
+## Relación con Procesamiento Digital de Señales
+
+- **Análisis de Fourier en tiempo continuo**: representación de señales periódicas como superposición de sinusoides; concepto de espectro (amplitud y fase por armónico); frecuencia fundamental y armónicos.
+- **Ortogonalidad**: base de funciones \(\{\cos(2\pi n t/T), \sin(2\pi n t/T)\}\) en un periodo; extracción de coeficientes por proyección (integral del producto).
+- **Aproximación truncada y fenómeno de Gibbs**: uso de un número finito de armónicos; oscilaciones y overshoot cerca de discontinuidades cuando \(N \to \infty\).
+- **Señales típicas**: ondas cuadrada, triangular, diente de sierra, pulsos; relación entre simetrías de la señal y coeficientes nulos (p. ej. \(a_n=0\) para señales impares).
+- **Transición a tiempo discreto**: la serie de Fourier en tiempo continuo es la base para la DFT/FFT y el análisis espectral discreto en PDS.
+
+---
+
+## Estructura del proyecto
+
+```
+src/
+├── App.tsx                 # Estado, parámetros, cálculo de coeficientes y datos para la gráfica
+├── lib/
+│   ├── fourier.ts          # simpsonIntegral, computeA0, computeAn, computeBn,
+│   │                        # computeFourierCoefficients, evaluateFourierSeries
+│   ├── signals.ts          # Señales predefinidas (cuadrada, sierra, triangular, etc.)
+│   ├── customExpression.ts # createCustomSignal, validateExpression (mathjs)
+│   └── formatAxisTick.ts   # Formato de etiquetas numéricas en ejes
+└── components/
+    ├── FourierChart.tsx    # Gráfica señal original vs aproximación Fourier (Recharts)
+    └── CoefficientsTable.tsx # Tabla a₀, aₙ, bₙ
+```
+
+---
+
+## Desarrollo
 
 ```bash
 npm install
 npm run dev
 ```
 
-Build para producción:
-
-```bash
-npm run build
-```
-
-**Despliegue (Vercel)**  
-Conecta el repositorio en [Vercel](https://vercel.com) o usa el CLI:
-
-```bash
-npm i -g vercel
-vercel
-```
-
-Vercel detecta el proyecto Vite y lo despliega sin configuración adicional.
+Build para producción: `npm run build`. Se puede desplegar en [Vercel](https://vercel.com) u otro host estático.
 
 ---
 
 ## Tecnologías
 
 - **Vite** + **React** + **TypeScript**
-- **Recharts** (gráficas)
-- **Tailwind CSS** (estilos)
-- **mathjs** (expresiones matemáticas para señales personalizadas)
+- **Recharts**: gráficas (LineChart, ejes, leyenda, tooltip)
+- **Tailwind CSS**: estilos
+- **mathjs**: evaluación de expresiones matemáticas para señales personalizadas

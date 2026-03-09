@@ -1,0 +1,174 @@
+% Reporte de práctica: Serie Trigonométrica de Fourier
+% Procesamiento Digital de Señales (PDS)
+
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{enumitem}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\title{\textbf{Reporte de práctica: Serie Trigonométrica de Fourier en tiempo continuo}\\[0.5em]
+\large Procesamiento Digital de Señales}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Se desarrolló una aplicación web interactiva para calcular y visualizar la \textbf{serie trigonométrica de Fourier} de señales periódicas en tiempo continuo. El reporte describe el marco teórico (representación de señales periódicas como suma de armónicos, coeficientes por integración sobre un periodo, ortogonalidad), la metodología de implementación (integración numérica por regla de Simpson 1/3, señales predefinidas y expresión personalizada, evaluación de la serie truncada) y la estructura del software. La herramienta permite elegir una señal, ajustar el número de armónicos \(N\) (1--50), comparar la señal original con la aproximación de Fourier y consultar los coeficientes \(a_0\), \(a_n\) y \(b_n\).
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Introducción}
+%==============================================================================
+
+El \textbf{análisis de Fourier} permite representar señales periódicas como superposición de sinusoides (senos y cosenos) cuyas frecuencias son múltiplos enteros de una frecuencia fundamental. En el curso de Procesamiento Digital de Señales (PDS) la \textbf{serie trigonométrica de Fourier} en tiempo continuo constituye la base para comprender el contenido frecuencial de una señal y, más adelante, la transformada de Fourier y el análisis espectral discreto (DFT/FFT).
+
+El objetivo de esta práctica fue implementar el cálculo de los coeficientes de la serie de Fourier por integración numérica y construir una interfaz que permita:
+\begin{itemize}[noitemsep]
+  \item Definir una señal periódica mediante catálogos predefinidos (onda cuadrada, diente de sierra, triangular, sinusoidal, pulso rectangular) o una expresión matemática en la variable \(t\).
+  \item Calcular los coeficientes \(a_0\), \(a_n\) y \(b_n\) para un número dado \(N\) de armónicos.
+  \item Graficar la señal original y la aproximación truncada de Fourier para comparar la convergencia de la serie.
+  \item Mostrar en tabla los coeficientes calculados.
+\end{itemize}
+
+El desarrollo se realizó en TypeScript/React con integración por regla de Simpson 1/3 y librerías de gráficas (Recharts) y evaluación de expresiones (mathjs).
+
+%==============================================================================
+\section{Marco teórico}
+%==============================================================================
+
+\subsection{Serie trigonométrica de Fourier}
+
+Sea \(f(t)\) una señal \textbf{periódica} de periodo \(T\), continua a trozos en un periodo. La \textbf{serie trigonométrica de Fourier} de \(f\) es
+\begin{equation}
+  f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} \left[ a_n \cos\left(\frac{2\pi n}{T}t\right) + b_n \sin\left(\frac{2\pi n}{T}t\right) \right].
+  \label{eq:serie}
+\end{equation}
+La frecuencia fundamental es \(\omega_0 = 2\pi/T\); el armónico \(n\) tiene frecuencia angular \(\omega_n = n\omega_0 = 2\pi n/T\) y frecuencia \(f_n = n/T\) (ciclos por unidad de tiempo). El término \(a_0/2\) corresponde a la \textbf{componente de continua} (valor medio de la señal en un periodo).
+
+\subsection{Cálculo de los coeficientes}
+
+Los coeficientes se obtienen integrando la señal multiplicada por el seno o coseno correspondiente sobre \textbf{un periodo}. Con el intervalo de integración \([-T/2, T/2]\):
+\begin{align}
+  a_0 &= \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,dt, \\
+  a_n &= \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,\cos\left(\frac{2\pi n}{T}t\right)dt, \qquad n \geq 1, \\
+  b_n &= \frac{2}{T} \int_{-T/2}^{T/2} f(t)\,\sin\left(\frac{2\pi n}{T}t\right)dt, \qquad n \geq 1.
+\end{align}
+Estas fórmulas se deducen de la \textbf{ortogonalidad} de las funciones \(\cos(2\pi n t/T)\) y \(\sin(2\pi n t/T)\) en \([-T/2, T/2]\): las integrales del producto de dos funciones distintas del conjunto \(\{1, \cos(2\pi n t/T), \sin(2\pi n t/T)\}\) sobre un periodo son nulas, de modo que al multiplicar \eqref{eq:serie} por una de ellas e integrar solo permanece el coeficiente asociado.
+
+\subsection{Aproximación truncada}
+
+En la práctica se usa una \textbf{suma finita} con \(N\) armónicos:
+\begin{equation}
+  f(t) \approx \frac{a_0}{2} + \sum_{n=1}^{N} \left[ a_n \cos\left(\frac{2\pi n}{T}t\right) + b_n \sin\left(\frac{2\pi n}{T}t\right) \right].
+  \label{eq:truncada}
+\end{equation}
+Cuanto mayor sea \(N\), mejor se aproxima la forma de la señal. En señales con \textbf{discontinuidades} (por ejemplo la onda cuadrada) aparece el \textbf{fenómeno de Gibbs}: al aumentar \(N\), la aproximación converge puntualmente salvo en los saltos, donde se observan overshoots que no desaparecen en el límite \(N \to \infty\).
+
+\subsection{Relación entre número de armónicos y forma de la onda}
+
+El armónico \(n\) completa \textbf{exactamente \(n\) ciclos} en un periodo \(T\). Cada sinusoide tiene un pico y un valle por ciclo; por tanto, con \(N\) armónicos el término de mayor frecuencia (\(n=N\)) aporta \textbf{N picos y N valles} en un periodo. Es correcto observar en la gráfica esa estructura (por ejemplo, 5 armónicos \(\Rightarrow\) 5 picos y 5 valles por periodo en la aproximación).
+
+\subsection{Conexión con PDS}
+
+En PDS el análisis de Fourier permite:
+\begin{itemize}
+  \item Caracterizar el \textbf{contenido frecuencial} de una señal (espectro de amplitudes y fases).
+  \item Entender la \textbf{respuesta de sistemas LTI} ante entradas sinusoidales (respuesta en frecuencia).
+  \item Sentar las bases para la \textbf{transformada de Fourier} y la \textbf{DFT/FFT} en tiempo discreto.
+\end{itemize}
+
+%==============================================================================
+\section{Metodología y desarrollo}
+%==============================================================================
+
+\subsection{Integración numérica: regla de Simpson 1/3}
+
+Las integrales que definen \(a_0\), \(a_n\) y \(b_n\) no tienen en general primitiva elemental para señales arbitrarias, por lo que se aproximan numéricamente. Se utiliza la \textbf{regla de Simpson 1/3} sobre \(n\) subintervalos (por defecto \(n=1000\)) en \([-T/2, T/2]\):
+\begin{equation}
+  \int_a^b \phi(t)\,dt \approx \frac{h}{3}\left[ \phi(a) + \phi(b) + \sum_{i=1}^{n-1} \lambda_i\,\phi(a+ih) \right],
+\end{equation}
+con \(h = (b-a)/n\) y \(\lambda_i = 4\) si \(i\) es impar, \(\lambda_i = 2\) si \(i\) es par. Para cada coeficiente se construye el integrando adecuado (\(\phi = f\), \(\phi = f\cdot\cos(2\pi n t/T)\) o \(\phi = f\cdot\sin(2\pi n t/T)\)) y se evalúa la suma. La función \texttt{simpsonIntegral} en \texttt{src/lib/fourier.ts} implementa este esquema.
+
+\subsection{Definición de señales}
+
+Cada señal se modela como una función \(t \mapsto \text{valor}\) (tipo \texttt{SignalFunction}):
+\begin{itemize}
+  \item \textbf{Predefinidas}: onda cuadrada, diente de sierra, triangular, sinusoidal y pulso rectangular, con periodo \(T=1\) y extensión periódica mediante normalización de la fase \(t \mapsto (t/T + 0.5) \bmod 1\).
+  \item \textbf{Expresión personalizada}: cadena de texto evaluada con mathjs usando la variable \texttt{t}; el periodo de análisis para la integración y la serie puede fijarse al ancho del rango mostrado (por ejemplo \(T=3\)) para que la serie aproxime la curva visible en ese intervalo.
+\end{itemize}
+
+\subsection{Cálculo de coeficientes y evaluación de la serie}
+
+La función \texttt{computeFourierCoefficients} calcula \(a_0\) y los pares \((a_n, b_n)\) para \(n=1,\ldots,N\). La función \texttt{evaluateFourierSeries} evalúa la suma truncada \eqref{eq:truncada} en cada punto \(t\) usando \(\omega_n = 2\pi n/T\). Los datos de la gráfica se generan muestreando la señal original y la aproximación en 500 puntos equiespaciados sobre el rango de visualización.
+
+%==============================================================================
+\section{Implementación del software}
+%==============================================================================
+
+\subsection{Herramientas utilizadas}
+
+\begin{itemize}
+  \item \textbf{Vite + React + TypeScript}: entorno de desarrollo y estructura de la aplicación.
+  \item \textbf{Recharts}: gráfica de la señal original y la aproximación de Fourier (LineChart, ejes, leyenda, tooltip).
+  \item \textbf{Tailwind CSS}: estilos y maquetación.
+  \item \textbf{mathjs}: compilación y evaluación de expresiones matemáticas para señales personalizadas.
+\end{itemize}
+
+\subsection{Estructura del proyecto}
+
+\begin{verbatim}
+src/
+  App.tsx                 # Estado, parámetros, cálculo de coeficientes y datos
+  lib/
+    fourier.ts            # simpsonIntegral, computeA0, computeAn, computeBn,
+                          # computeFourierCoefficients, evaluateFourierSeries
+    signals.ts            # Señales predefinidas (cuadrada, sierra, triangular, etc.)
+    customExpression.ts   # createCustomSignal, validateExpression (mathjs)
+    formatAxisTick.ts     # Formato de etiquetas numéricas en ejes
+  components/
+    FourierChart.tsx      # Gráfica señal original vs aproximación Fourier
+    CoefficientsTable.tsx # Tabla a₀, aₙ, bₙ
+\end{verbatim}
+
+\subsection{Interfaz de usuario}
+
+\begin{enumerate}
+  \item \textbf{Sección ``Parámetros''}: selección de señal (preset o expresión personalizada) y número de armónicos \(N\) (1--50).
+  \item \textbf{Sección ``Gráfica''}: comparación entre la señal original (verde, continua) y la aproximación de Fourier (rosa, discontinua); ejes \(t\) y amplitud.
+  \item \textbf{Sección ``Coeficientes de Fourier''}: valor de \(a_0\) y tabla con \(a_n\), \(b_n\) para cada \(n\), más recordatorio de la fórmula de la serie.
+\end{enumerate}
+
+%==============================================================================
+\section{Resultados y conclusiones}
+%==============================================================================
+
+Se obtuvo una aplicación web funcional que calcula los coeficientes de la serie trigonométrica de Fourier por integración numérica (Simpson 1/3) y visualiza la aproximación truncada frente a la señal original. El usuario puede experimentar con distintas señales y con el número de armónicos para observar la convergencia de la serie y, en señales con discontinuidades, el comportamiento típico del fenómeno de Gibbs.
+
+La práctica refuerza los conceptos de PDS sobre análisis de Fourier en tiempo continuo, ortogonalidad de sinusoides, espectro de una señal periódica y aproximación por series truncadas, y sirve como base para el estudio de la transformada de Fourier y el análisis espectral discreto.
+
+%==============================================================================
+\section*{Referencias}
+%==============================================================================
+
+\begin{enumerate}
+  \item Oppenheim, A. V., Willsky, A. S., \& Nawab, S. H. \emph{Señales y sistemas} (2ª ed.). Pearson.
+  \item Proyecto \texttt{Serie-Trigo-Fourier}: \url{https://github.com/Oliverx25/Serie-Trigo-Fourier.git} (repositorio del código y README).
+  \item mathjs -- Expresiones matemáticas: \url{https://mathjs.org/}.
+\end{enumerate}
+
+\end{document}

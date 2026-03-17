@@ -3,15 +3,20 @@
  *
  * f(t) = a₀/2 + Σ[aₙ·cos(2πn t/T) + bₙ·sin(2πn t/T)]  para n = 1 .. N
  *
- * Coeficientes:
- * a₀ = (2/T) ∫ f(t) dt
- * aₙ = (2/T) ∫ f(t)·cos(2πn t/T) dt
- * bₙ = (2/T) ∫ f(t)·sin(2πn t/T) dt
+ * Coeficientes (integrando sobre UN PERÍODO en intervalo CERRADO):
+ * a₀ = (2/T) ∫_{[-T/2, T/2]} f(t) dt
+ * aₙ = (2/T) ∫_{[-T/2, T/2]} f(t)·cos(2πn t/T) dt
+ * bₙ = (2/T) ∫_{[-T/2, T/2]} f(t)·sin(2πn t/T) dt
+ *
+ * IMPORTANTE: Toda la integración se realiza en el INTERVALO CERRADO [-T/2, T/2].
  */
 
 export type SignalFunction = (t: number) => number;
 
-/** Integración numérica por regla de Simpson (1/3) */
+/**
+ * Integración numérica por regla de Simpson (1/3) en intervalo CERRADO [a, b].
+ * Evalúa f en a, a+h, ..., b (incluye ambos extremos). n = número de subintervalos.
+ */
 function simpsonIntegral(
   f: SignalFunction,
   a: number,
@@ -30,7 +35,8 @@ function simpsonIntegral(
 }
 
 /**
- * Calcula el coeficiente a₀ (componente DC)
+ * Calcula el coeficiente a₀ (componente DC).
+ * Integración en INTERVALO CERRADO [-T/2, T/2].
  */
 export function computeA0(f: SignalFunction, T: number): number {
   const factor = 2 / T;
@@ -38,7 +44,8 @@ export function computeA0(f: SignalFunction, T: number): number {
 }
 
 /**
- * Calcula el coeficiente aₙ
+ * Calcula el coeficiente aₙ.
+ * Integración en INTERVALO CERRADO [-T/2, T/2].
  */
 export function computeAn(
   f: SignalFunction,
@@ -52,7 +59,8 @@ export function computeAn(
 }
 
 /**
- * Calcula el coeficiente bₙ
+ * Calcula el coeficiente bₙ.
+ * Integración en INTERVALO CERRADO [-T/2, T/2].
  */
 export function computeBn(
   f: SignalFunction,
@@ -73,6 +81,7 @@ export interface FourierCoefficients {
 
 /**
  * Calcula todos los coeficientes de Fourier hasta el armónico N (n = 1 .. N).
+ * Todas las integrales se evalúan en el INTERVALO CERRADO [-T/2, T/2].
  */
 export function computeFourierCoefficients(
   f: SignalFunction,
@@ -93,6 +102,7 @@ export function computeFourierCoefficients(
 
 /**
  * Evalúa la aproximación de Fourier en el punto t (ωₙ = 2πn/T).
+ * Los coeficientes fueron calculados integrando en el INTERVALO CERRADO [-T/2, T/2].
  */
 export function evaluateFourierSeries(
   coeffs: FourierCoefficients,

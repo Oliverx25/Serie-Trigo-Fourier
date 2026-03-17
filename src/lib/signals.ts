@@ -1,6 +1,7 @@
 /**
- * Señales periódicas predefinidas para la Serie de Fourier
- * f(t) definida para t ∈ [-T/2, T/2], extendida periódicamente
+ * Señales periódicas predefinidas para la Serie de Fourier.
+ * f(t) definida para t en el INTERVALO CERRADO [-T/2, T/2], extendida periódicamente.
+ * La integración de coeficientes usa ese mismo intervalo cerrado (véase fourier.ts).
  */
 
 import type { SignalFunction } from './fourier';

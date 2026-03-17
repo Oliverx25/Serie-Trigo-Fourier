@@ -47,10 +47,17 @@ function App() {
     const period = signalId === 'custom' ? T_CUSTOM : T;
     const coeffs = computeFourierCoefficients(signalFn, period, harmonics);
 
+    // ========== INTERVALO CERRADO [T_MIN, T_MAX] para las muestras de la gráfica ==========
+    // Las muestras se toman en intervalo CERRADO: primer t = T_MIN, último t = T_MAX.
+    // Fórmula t_i = T_MIN + (T_MAX - T_MIN) * i / (numPoints - 1) para i = 0..numPoints-1.
+    // Se usa índice i para evitar error por acumulación de punto flotante (t += step).
     const data: { t: number; original: number; fourier: number }[] = [];
-    const step = (T_MAX - T_MIN) / SAMPLE_POINTS;
-
-    for (let t = T_MIN; t <= T_MAX; t += step) {
+    const numPoints = SAMPLE_POINTS;
+    for (let i = 0; i < numPoints; i++) {
+      const t =
+        numPoints === 1
+          ? T_MIN
+          : T_MIN + ((T_MAX - T_MIN) * i) / (numPoints - 1);
       data.push({
         t,
         original: signalFn(t),

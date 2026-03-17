@@ -1,8 +1,8 @@
 /**
- * Parser de expresiones matemáticas personalizadas para la Serie de Fourier
+ * Parser de expresiones matemáticas personalizadas para la Serie de Fourier.
  * Variable: t (tiempo real). Se evalúa f(t) en cada t para que la gráfica
  * muestre la función correcta (ej: "sin(t)" como seno). Los coeficientes
- * se calculan integrando f(t) en [-T/2, T/2].
+ * se calculan integrando f(t) en el INTERVALO CERRADO [-T/2, T/2] (véase fourier.ts).
  */
 
 import { create, all } from 'mathjs';
